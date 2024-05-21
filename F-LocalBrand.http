@@ -1,0 +1,6 @@
+@F_LocalBrand_HostAddress = http://localhost:5071
+
+GET {{F_LocalBrand_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
