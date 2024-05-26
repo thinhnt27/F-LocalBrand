@@ -26,17 +26,7 @@ pipeline {
 
         stage('Deploy FE to DEV') {
             steps {
-                withCredentials([file(credentialsId: 'be', variable: 'FILE'),
-                [
-                    SECRET_KEY: 'SECRET_KEY',
-                    DB_SERVER: 'DB_SERVER',
-                    DB_NAME: 'DB_NAME',
-                    DB_USER: 'DB_USER',
-                    DB_PASSWORD: 'DB_PASSWORD',
-                    DB_TRUST_SERVER_CERTIFICATE: 'DB_TRUST_SERVER_CERTIFICATE',
-                    DB_MULTIPLE_ACTIVE_RESULT_SETS: 'DB_MULTIPLE_ACTIVE_RESULT_SETS'
-                ]])
-                {
+                withCredentials([string(credentialsId: 'SECRET_KEY', variable: 'SECRET_KEY'), string(credentialsId: 'DB_SERVER', variable: 'DB_SERVER'), string(credentialsId: 'DB_NAME', variable: 'DB_NAME'), string(credentialsId: 'DB_USER', variable: 'DB_USER'), string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD'), string(credentialsId: 'DB_TRUST_SERVER_CERTIFICATE', variable: 'DB_TRUST_SERVER_CERTIFICATE'), string(credentialsId: 'DB_MULTIPLE_ACTIVE_RESULT_SETS', variable: 'DB_MULTIPLE_ACTIVE_RESULT_SETS')]) {
                     echo 'Deploying and cleaning'
                     sh 'docker container stop flocalbrandapi || echo "this container does not exist" '
                     sh 'echo y | docker system prune '
