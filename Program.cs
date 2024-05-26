@@ -4,8 +4,11 @@ using F_LocalBrand.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System;
+using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
+
+DotNetEnv.Env.Load();
 
 
 builder.Services.AddInfrastructure(builder.Configuration);
