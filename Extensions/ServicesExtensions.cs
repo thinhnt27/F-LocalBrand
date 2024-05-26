@@ -35,7 +35,16 @@ public static class ServicesExtensions
         ////Set time for PostgreSQL
         //AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-        var jwtSettings = configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>();
+        //var jwtSettings = configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>();
+        var secretKey = Environment.GetEnvironmentVariable("SECRET_KEY");
+        if (string.IsNullOrEmpty(secretKey))
+        {
+            throw new InvalidOperationException("JWT Secret Key is not configured.");
+        }
+        var jwtSettings = new JwtSettings
+        {
+            Key = secretKey
+        };
         services.Configure<JwtSettings>(val =>
         {
             val.Key = jwtSettings.Key;
@@ -65,15 +74,25 @@ public static class ServicesExtensions
                 };
             });
 
+        var dbServer = Environment.GetEnvironmentVariable("DB_SERVER");
+        var dbName = Environment.GetEnvironmentVariable("DB_NAME");
+        var dbUser = Environment.GetEnvironmentVariable("DB_USER");
+        var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
+        var dbTrustServerCertificate = Environment.GetEnvironmentVariable("DB_TRUST_SERVER_CERTIFICATE");
+        var dbMultipleActiveResultSets = Environment.GetEnvironmentVariable("DB_MULTIPLE_ACTIVE_RESULT_SETS");
+
+        var connectionString = $"Data Source={dbServer};Initial Catalog={dbName};User ID={dbUser};Password={dbPassword};TrustServerCertificate={dbTrustServerCertificate};MultipleActiveResultSets={dbMultipleActiveResultSets}";
+
         services.AddDbContext<SWD_FLocalBrandContext>(opt =>
         {
-            opt.UseSqlServer(configuration.GetConnectionString("FLocalBrand"));
+            opt.UseSqlServer(connectionString);
         });
         services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddTransient<IUserRepository, UserRepository>();
         services.AddTransient<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IdentityService>();
         services.AddScoped<UserService>();
+        services.AddScoped<JwtSettings>();
 
 
         //services.AddScoped(typeof(IRepository<,>), typeof(GenericRepository<,>));
