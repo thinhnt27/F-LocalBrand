@@ -7,6 +7,9 @@ using F_LocalBrand.Common.Payloads.Responses;
 using F_LocalBrand.Exceptions;
 using F_LocalBrand.Services;
 using F_LocalBrand.Service;
+using F_LocalBrand.Dtos;
+using FluentValidation;
+using F_LocalBrand.Validation;
 
 namespace F_LocalBrand.Common;
 
@@ -16,17 +19,33 @@ public class AuthController : ControllerBase
 {
     private readonly IdentityService _identityService;
     private readonly UserService _userService;
+    private readonly IValidator<UserModel> _userValidator;
 
-    public AuthController(IdentityService identityService, UserService userService)
+    public AuthController(IdentityService identityService, UserService userService, IValidator<UserModel> userValidator)
     {
         _identityService = identityService;
-        _userService = userService; 
+        _userService = userService;
+        _userValidator = userValidator;
+    }
+
+    [AllowAnonymous]
+    [HttpPost]
+    public async Task<IActionResult> CreateUser(UserModel userModel)
+    {
+        var validationResult = await _userValidator.ValidateAsync(userModel);
+        if (!validationResult.IsValid)
+        {
+            var problemDetails = validationResult.ToProblemDetails();
+            return BadRequest(problemDetails);
+        }
+        return Ok(userModel);
     }
 
     [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> Signup([FromBody] SignupRequest req)
     {
+
         var handler = new JwtSecurityTokenHandler();
         var res = await _identityService.Signup(req);
         if (!res.Authenticated)

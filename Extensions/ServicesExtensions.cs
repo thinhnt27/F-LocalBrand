@@ -11,6 +11,9 @@ using F_LocalBrand.Repository;
 using F_LocalBrand.UnitOfWorks;
 using F_LocalBrand.Services;
 using F_LocalBrand.Service;
+using FluentValidation;
+using F_LocalBrand.Validation;
+using F_LocalBrand.Dtos;
 
 namespace F_LocalBrand.Extensions;
 
@@ -20,6 +23,10 @@ public static class ServicesExtensions
     {
         services.AddScoped<ExceptionMiddleware>();
         services.AddControllers();
+        //services.AddFluentValidation(fv =>
+        //{
+        //    fv.RegisterValidatorsFromAssemblyContaining<UserValidation>();
+        //});
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
 
@@ -93,6 +100,7 @@ public static class ServicesExtensions
         services.AddScoped<IdentityService>();
         services.AddScoped<UserService>();
         services.AddScoped<JwtSettings>();
+        services.AddScoped<IValidator<UserModel>, UserValidation>();
 
 
         //services.AddScoped(typeof(IRepository<,>), typeof(GenericRepository<,>));
