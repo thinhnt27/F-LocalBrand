@@ -10,7 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 DotNetEnv.Env.Load();
 
-
+//Add services to the container.
+//All services are added to the IServiceCollection and later consumed by the application.
+//It helps to keep the code clean and easy to maintain.
 builder.Services.AddInfrastructure(builder.Configuration);
 //// Add services to the container.
 

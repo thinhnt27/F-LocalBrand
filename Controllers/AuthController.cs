@@ -10,6 +10,7 @@ using F_LocalBrand.Service;
 using F_LocalBrand.Dtos;
 using FluentValidation;
 using F_LocalBrand.Validation;
+using F_LocalBrand.Helpers;
 
 namespace F_LocalBrand.Common;
 
@@ -21,13 +22,20 @@ public class AuthController : ControllerBase
     private readonly UserService _userService;
     private readonly IValidator<UserModel> _userValidator;
 
-    public AuthController(IdentityService identityService, UserService userService, IValidator<UserModel> userValidator)
+    private readonly EmailService _emailService;
+
+    public AuthController(IdentityService identityService, UserService userService, IValidator<UserModel> userValidator, EmailService emailService)
     {
         _identityService = identityService;
         _userService = userService;
         _userValidator = userValidator;
+        _emailService = emailService;
     }
 
+
+
+
+    //This is test validation
     [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> CreateUser(UserModel userModel)
@@ -39,6 +47,19 @@ public class AuthController : ControllerBase
             return BadRequest(problemDetails);
         }
         return Ok(userModel);
+    }
+
+    //This is test send mail
+    [AllowAnonymous]
+    [HttpPost]
+    public async Task<IActionResult> SendMail([FromBody] MailData mailData)
+    {
+        var result = await _emailService.SendEmailAsync(mailData);
+        if (!result)
+        {
+            return BadRequest("Send mail fail");
+        }
+        return Ok("Send mail success");
     }
 
     [AllowAnonymous]

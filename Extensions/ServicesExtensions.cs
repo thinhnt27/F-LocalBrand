@@ -14,6 +14,7 @@ using F_LocalBrand.Service;
 using FluentValidation;
 using F_LocalBrand.Validation;
 using F_LocalBrand.Dtos;
+using F_LocalBrand.Helpers;
 
 namespace F_LocalBrand.Extensions;
 
@@ -23,10 +24,6 @@ public static class ServicesExtensions
     {
         services.AddScoped<ExceptionMiddleware>();
         services.AddControllers();
-        //services.AddFluentValidation(fv =>
-        //{
-        //    fv.RegisterValidatorsFromAssemblyContaining<UserValidation>();
-        //});
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
 
@@ -80,7 +77,18 @@ public static class ServicesExtensions
                     ValidateIssuerSigningKey = true
                 };
             });
+        //Get config mail form environment
+        services.Configure<MailSettings>(options =>
+        {
+            options.Server = Environment.GetEnvironmentVariable("MailSettings__Server");
+            options.Port = int.Parse(Environment.GetEnvironmentVariable("MailSettings__Port") ?? "0");
+            options.SenderName = Environment.GetEnvironmentVariable("MailSettings__SenderName");
+            options.SenderEmail = Environment.GetEnvironmentVariable("MailSettings__SenderEmail");
+            options.UserName = Environment.GetEnvironmentVariable("MailSettings__UserName");
+            options.Password = Environment.GetEnvironmentVariable("MailSettings__Password");
+        });
 
+        //Get Connection String config from environment
         var dbServer = Environment.GetEnvironmentVariable("DB_SERVER");
         var dbName = Environment.GetEnvironmentVariable("DB_NAME");
         var dbUser = Environment.GetEnvironmentVariable("DB_USER");
@@ -88,18 +96,29 @@ public static class ServicesExtensions
         var dbTrustServerCertificate = Environment.GetEnvironmentVariable("DB_TRUST_SERVER_CERTIFICATE");
         var dbMultipleActiveResultSets = Environment.GetEnvironmentVariable("DB_MULTIPLE_ACTIVE_RESULT_SETS");
 
+        //Set Connection String
         var connectionString = $"Data Source={dbServer};Initial Catalog={dbName};User ID={dbUser};Password={dbPassword};TrustServerCertificate={dbTrustServerCertificate};MultipleActiveResultSets={dbMultipleActiveResultSets}";
 
+        //Add connection to database
         services.AddDbContext<SWD_FLocalBrandContext>(opt =>
         {
             opt.UseSqlServer(connectionString);
         });
+
+        //add repositories
         services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddTransient<IUserRepository, UserRepository>();
+
+        //Add UnitOfWork
         services.AddTransient<IUnitOfWork, UnitOfWork>();
+
+        //Add Services
         services.AddScoped<IdentityService>();
         services.AddScoped<UserService>();
         services.AddScoped<JwtSettings>();
+        services.AddScoped<EmailService>();
+
+        //Add Validation
         services.AddScoped<IValidator<UserModel>, UserValidation>();
 
 
