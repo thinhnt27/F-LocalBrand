@@ -15,6 +15,8 @@ using FluentValidation;
 using F_LocalBrand.Validation;
 using F_LocalBrand.Dtos;
 using F_LocalBrand.Helpers;
+using StackExchange.Redis;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace F_LocalBrand.Extensions;
 
@@ -104,6 +106,33 @@ public static class ServicesExtensions
         {
             opt.UseSqlServer(connectionString);
         });
+
+        var redisConnection = new RedisConnection();
+        configuration.GetSection("RedisConnection").Bind(redisConnection);
+
+        // Register RedisConfiguration as a singleton
+        services.AddSingleton(redisConnection);
+
+        // Configure Redis connection
+        services.AddSingleton<IConnectionMultiplexer>(option =>
+           ConnectionMultiplexer.Connect(new ConfigurationOptions
+           {
+
+               EndPoints = { $"{redisConnection.Host}:{redisConnection.Port}" },
+               //Ssl = redisConnection.IsSSL,
+               //Password = redisConnection.Password
+
+
+           }));
+
+        // Add StackExchangeRedisCache as the IDistributedCache implementation
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = $"{redisConnection.Host}:{redisConnection.Port}";
+        });
+
+        // Register ResponseCacheService
+        services.AddSingleton<IResponseCacheService, ResponseCacheService>();
 
         //add repositories
         services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
