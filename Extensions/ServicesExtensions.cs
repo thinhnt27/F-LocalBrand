@@ -17,6 +17,7 @@ using F_LocalBrand.Dtos;
 using F_LocalBrand.Helpers;
 using StackExchange.Redis;
 using static Org.BouncyCastle.Math.EC.ECCurve;
+using F_LocalBrand.Hubs;
 
 namespace F_LocalBrand.Extensions;
 
@@ -28,6 +29,7 @@ public static class ServicesExtensions
         services.AddControllers();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
+        services.AddSignalR();
 
         //Add Mapper
         var mapperConfig = new MapperConfiguration(mc =>
@@ -124,6 +126,7 @@ public static class ServicesExtensions
 
 
            }));
+        services.AddSingleton<MessageHub>();
 
         // Add StackExchangeRedisCache as the IDistributedCache implementation
         services.AddStackExchangeRedisCache(options =>

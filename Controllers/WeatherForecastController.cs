@@ -54,7 +54,7 @@ namespace F_LocalBrand.Controllers
         [HttpGet("Create")]
         public async Task<IActionResult> Create()
         {
-            await _responseCacheService.RemoveCacheRepsonseAsync("/WeatherForecast");
+            await _responseCacheService.RemoveCacheRepsonseAsync("/WeatherForecast|keyword");
             return Ok("Create");
         }
     }

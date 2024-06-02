@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System;
 using DotNetEnv;
+using F_LocalBrand.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -79,6 +80,8 @@ app.UseMiddleware<ExceptionMiddleware>();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.MapHub<MessageHub>("/messagehub");
 
 app.MapControllers();
 
